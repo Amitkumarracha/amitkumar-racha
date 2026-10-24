@@ -1,0 +1,26 @@
+# Supplied assignment pack and private diagnostics: never publish.
+/data/
+/gps/
+/stations.csv
+/maintenance_log.md
+/Aeron-AI-Research-Engineer-Intern-AssignmentNew.pdf
+/.private/
+# Any local packs or exports of raw observations belong here.
+/private_data/
+/diagnostics/
+# Protect raw-record copies too; only the two reviewed CSV deliverables are public.
+*.csv
+!/flags.csv
+!/coverage.csv
+*.nmea
+*.NMEA
+# Keep conversation masters and unreviewed exports out of the public log folder.
+/ai_logs/private/
+/ai_logs/unreviewed/
+.env
+.env.*
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+.DS_Store

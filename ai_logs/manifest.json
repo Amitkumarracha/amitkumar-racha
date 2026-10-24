@@ -1,0 +1,35 @@
+{
+  "exported_at_utc": "2026-10-24T13:04:28.075237+00:00",
+  "source_file": "rollout-2026-10-24T16-57-11-01a16daa-2aa1-7fe1-a7d9-60bed522b65f.jsonl",
+  "source_bytes_read": 3384424,
+  "source_prefix_sha256": "62158150bfe67c43377381e65206edbe4828d8ed58275d18f328ea2d3d1bdf8c",
+  "starts_with_first_assignment_prompt": true,
+  "first_record_utc": "2026-10-24T11:27:54.219Z",
+  "last_record_utc": "2026-10-24T13:04:12.634Z",
+  "first_assignment_prompt_utc": "2026-10-24T11:27:54.230Z",
+  "record_count": 147,
+  "counts": {
+    "user": 10,
+    "assistant": 21,
+    "custom_tool_call": 57,
+    "custom_tool_call_output": 56,
+    "function_call": 1,
+    "assistant_question": 1,
+    "function_call_output": 1
+  },
+  "unmatched_tool_calls_at_cutoff": 1,
+  "status": "snapshot_refresh_after_final_turn",
+  "public_release_status": "blocked_contains_supplied_data",
+  "raw_record_matches": 15,
+  "exports": {
+    "codex-conversation.jsonl": {
+      "local_path": ".private/ai_logs/codex-conversation.jsonl",
+      "sha256": "1e8430713cf4c1fb098d58d3ee0354ecce5d56a2c02d70f5aac67b6b87181c4e"
+    },
+    "codex-conversation.html": {
+      "local_path": ".private/ai_logs/codex-conversation.html",
+      "sha256": "0b5a6ea5662c67ac0ff7c5571292b74163df45b17ca06231fcdeebf2d7a1667e"
+    }
+  },
+  "publication_link": null
+}
