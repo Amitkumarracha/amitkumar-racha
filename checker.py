@@ -158,11 +158,12 @@ class Checker:
                 mask |= d._time.between(pd.Timestamp(f['start_utc']), pd.Timestamp(f['end_utc']))
         return mask
 
-    def maintenance(self, station, words, start, end):
+    def maintenance(self, station, words, start, end, context=()):
         """Dates corroborate; unspecified local note times never set UTC bounds."""
         lo, hi = pd.Timestamp(start).normalize() - pd.Timedelta(days=1), pd.Timestamp(end).normalize() + pd.Timedelta(days=1)
         return [date for date, sid, text in self.notes if sid == station and lo <= date <= hi
-                and any(word in text.lower() for word in words)]
+                and any(word in text.lower() for word in words)
+                and (not context or any(word in text.lower() for word in context))]
 
     def read(self):
         path = self.pack / 'stations.csv'
@@ -456,9 +457,12 @@ class Checker:
         self.real_events({c: self.wide(c) for c in ['temp_c', 'rh_pct', 'wind_kmh']})
 
     def wind_change(self, station, wind, reference):
-        daily = wind[station].resample('D').mean() / reference.resample('D').mean().replace(0, np.nan)
+        # Compare the same UTC samples so selective outages cannot mimic a scale change.
+        paired = pd.DataFrame({'target': wind[station], 'reference': reference}).dropna()
+        daily_mean = paired.resample('D').mean()
+        daily = daily_mean.target / daily_mean.reference.replace(0, np.nan)
         needed = math.ceil(18 * 3600 / self.intervals[station].total_seconds())
-        enough = wind[station].resample('D').count().ge(needed) & reference.resample('D').count().ge(needed)
+        enough = paired.target.resample('D').count().ge(needed)
         daily = daily.where(enough)
         daily = daily.replace([np.inf, -np.inf], np.nan).dropna()
         if len(daily) < 14:
@@ -478,7 +482,8 @@ class Checker:
         _, split, factor = max(choices)
         boundary = daily.index[split]
         before_level = daily.iloc[:split].median()
-        hourly = wind[station].resample('h').mean() / reference.resample('h').mean().replace(0, np.nan)
+        hourly_mean = paired.resample('h').mean()
+        hourly = hourly_mean.target / hourly_mean.reference.replace(0, np.nan)
         low = hourly.lt(before_level*.5) if factor < 1 else hourly.gt(before_level*2)
         near = hourly.index.to_series().between(boundary-pd.Timedelta(hours=36), boundary+pd.Timedelta(hours=12))
         candidates = []
@@ -523,7 +528,7 @@ class Checker:
         self.diagnostics[station]['exposure'] = dict(bright_dark_growth_c=round(growth, 2),
                                                    night_change_c=round(night_change, 2), onset=str(onset))
         self.flag_mask(station, 'temp_c', mask, 'Possible sunlight heating bias', 'exclude',
-                       f'The bright-minus-dark temperature residual against peers grows {growth:.1f}°C while the nighttime change is {night_change:+.1f}°C; conservatively withhold only these ≥500 W/m² intervals pending an exposure check, with onset uncertain.')
+                       f'The bright-minus-dark temperature residual against peers grows {growth:.2f}°C while the nighttime change is {night_change:+.2f}°C; conservatively withhold only these ≥500 W/m² intervals pending an exposure check, with onset uncertain.')
 
     def rain_blockage(self, station, wide, peers):
         d = self.frames[station]
@@ -532,14 +537,17 @@ class Checker:
             if len(ix) * interval < pd.Timedelta(days=2):
                 continue
             next_rows = d.iloc[ix[-1]+1:ix[-1]+4]
-            if next_rows.empty:
-                release = 0
-            else:
-                release = next_rows.rain_mm.sum()
+            expected = pd.date_range(end + interval, periods=len(next_rows), freq=interval)
+            # A later storm after a telemetry gap is not evidence of delayed release.
+            contiguous = next_rows._time.eq(pd.Series(expected, index=next_rows.index)).cummin()
+            next_rows = next_rows[contiguous]
+            release = wide['rain_mm'][station].reindex(next_rows._time).sum()
             rain = wide['rain_mm'].loc[start:end, peers]
             totals = rain.sum(min_count=1)
             wet_peers = totals[totals.ge(5)]
-            service = self.maintenance(station, ['funnel', 'leaves', 'nest', 'clean', 'rain gauge'], end, end+pd.Timedelta(days=1))
+            service = self.maintenance(station, ['clean', 'clear', 'block', 'clog', 'leaves', 'nest'],
+                                       end, end+pd.Timedelta(days=1),
+                                       context=['funnel', 'rain gauge', 'rain-gauge', 'tipping bucket'])
             if len(wet_peers) < 2 or (release < 10 and not service):
                 continue
             wet = rain[wet_peers.index].gt(0).sum(axis=1).ge(2)
@@ -548,8 +556,9 @@ class Checker:
             first_wet = wet.index[wet][0]
             until = next_rows._time.iloc[-1] if release >= 10 else end
             self.add(station, 'rain_mm', first_wet, until, 'Blocked gauge / delayed release', 'exclude',
-                     f'The gauge reports zero while {len(wet_peers)} peers each collect at least 5 mm, followed by {release:.1f} mm in three intervals' +
-                     (' near a documented funnel cleaning' if service else '') +
+                     f'The gauge reports zero while {len(wet_peers)} peers each collect at least 5 mm' +
+                     (f', followed by {release:.1f} mm across {len(next_rows)} consecutive observation(s)' if release >= 10 else '') +
+                     (' near documented rain-gauge obstruction or clearing' if service else '') +
                      '; onset is bracketed rather than exact and released water is neither timed rainfall nor safely redistributable.')
 
     def real_events(self, wide):

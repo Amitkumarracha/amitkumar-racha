@@ -22,7 +22,7 @@ def choose_visit(result):
         station = wind.station_id.iloc[0]
         runner = heat.station_id.iloc[0] if not heat.empty else None
         return dict(station=station, runner=runner,
-            reason='The wind change persists through the final day after a sensor replacement; verifying the model and logger conversion offers a focused, practical repair.',
+            reason='The wind change persists through the final day; verifying the sensor model and logger conversion offers a focused, practical repair.',
             plan=[('0–10 min', 'Photograph the sensor model and logger settings; compare the documented pulse-to-speed conversion first.'),
                   ('10–40 min', 'Check wiring and free rotation; change the conversion only after confirming a mismatch, never from the peer ratio alone.'),
                   ('40–60 min', 'Verify against a reference or manufacturer-supported check, confirm live logging, and record settings, results and UTC intervention time.')],
@@ -57,7 +57,7 @@ def report_html(result):
     labels = {
         'GPS-proven clock offset': 'Clock recovered',
         'Persistent pressure step': 'Pressure withheld',
-        'Sensor flatline': 'Temperature withheld',
+        'Sensor flatline': 'Sensor readings withheld',
         'Persistent humidity fault': 'Humidity withheld',
         'Blocked gauge / delayed release': 'Rain totals incomplete',
         'Persistent wind scale change': 'Wind withheld',
@@ -77,7 +77,7 @@ def report_html(result):
         elif issue == 'Persistent humidity fault':
             detail = f'{pd.Timestamp(f.start_utc):%d %b %H:%M}–{pd.Timestamp(f.end_utc):%d %b %H:%M}; prolonged overshoot exceeds ordinary saturation.'
         elif issue == 'Blocked gauge / delayed release':
-            detail = 'Dry readings during peer rainfall and a later water release; withheld amounts are not reconstructed.'
+            detail = 'Dry readings during peer rainfall, supported by release or maintenance evidence; withheld amounts are not reconstructed.'
         else:
             detail = f'Scale change from about {pd.Timestamp(f.start_utc):%d %b %H:%M}; check the sensor-to-logger conversion.'
         evidence.append(f'<li><b>{escape(f.station_id)} · {label}.</b> {escape(detail)}</li>')
@@ -91,7 +91,7 @@ def report_html(result):
         station = heat.station_id.iloc[0]
         onset = heat.start_utc.min()
         growth = result.diagnostics[station]['exposure']['bright_dark_growth_c']
-        uncertainty.append(f'{station}: daytime warming against peers grew {growth:.1f}°C; strongly sunlit periods are withheld from {pd.Timestamp(onset):%d %b %H:%M}. Earlier onset is unclear: defer full-window temperature maxima and trend claims.')
+        uncertainty.append(f'{station}: daytime warming against peers grew {growth:.2f}°C; strongly sunlit periods are withheld from {pd.Timestamp(onset):%d %b %H:%M}. Earlier onset is unclear: defer full-window temperature maxima and trend claims.')
     conflicts = finding('Location sources disagree')
     if not conflicts.empty:
         uncertainty.append(f'{conflicts.station_id.iloc[0]}: GPS and installation coordinates disagree; retain weather provisionally and verify location before mapping it.')

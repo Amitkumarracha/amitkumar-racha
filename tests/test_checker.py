@@ -242,6 +242,17 @@ def test_persistent_wind_scale_change(tmp_path):
     assert f.station_id.tolist() == ['N1'] and '0.25' in f.note.iloc[0]
 
 
+def test_missing_windy_hours_are_not_a_scale_change(tmp_path):
+    pack(tmp_path, ids=('N1', 'N2', 'N3'), n=144*28)
+    for station in ('N1', 'N2', 'N3'):
+        def edit(d):
+            d['wind_kmh'] = np.where(d.index % 144 >= 108, 80., 5.)
+            if station == 'N1':
+                return d[~((d.index >= 144*14) & (d.index % 144 >= 108))]
+        change(tmp_path, station, edit)
+    assert issues(analyze(tmp_path), 'Persistent wind scale change').empty
+
+
 def test_delayed_rain_release_needs_independent_evidence(tmp_path):
     pack(tmp_path, ids=('N1', 'N2', 'N3'), n=144*14)
     for station in ('N2', 'N3'):
@@ -253,6 +264,51 @@ def test_delayed_rain_release_needs_independent_evidence(tmp_path):
     change(tmp_path, 'N1', release)
     result = analyze(tmp_path)
     assert issues(result, 'Blocked gauge / delayed release').station_id.tolist() == ['N1']
+
+
+@pytest.mark.parametrize('scenario', ['telemetry_gap', 'unrelated_cleaning', 'invalid_release'])
+def test_rain_blockage_does_not_use_unrelated_evidence(tmp_path, scenario):
+    times = pack(tmp_path, ids=('N1', 'N2', 'N3'), n=144*14)
+    for station in ('N2', 'N3'):
+        def rain(d):
+            d.loc[144*5:144*5+59, 'rain_mm'] = .2
+        change(tmp_path, station, rain)
+    if scenario == 'telemetry_gap':
+        def edit(d):
+            d.loc[144*10:144*10+2, 'rain_mm'] = 8
+            return d[~d.index.to_series().between(144*8, 144*10-1)]
+        change(tmp_path, 'N1', edit)
+    elif scenario == 'unrelated_cleaning':
+        (tmp_path/'maintenance_log.md').write_text(
+            f'{times[-1]:%Y-%m-%d}  N1  Cleaned leaves off the solar panel.\n')
+    else:
+        def invalid(d):
+            d.loc[144*10:144*10+2, 'rain_mm'] = 200
+        change(tmp_path, 'N1', invalid)
+    assert issues(analyze(tmp_path), 'Blocked gauge / delayed release').empty
+
+
+@pytest.mark.parametrize('release', [False, True])
+def test_rain_evidence_note_matches_available_observations(tmp_path, release):
+    times = pack(tmp_path, ids=('N1', 'N2', 'N3'), n=144*4)
+    for station in ('N2', 'N3'):
+        def rain(d):
+            d.loc[144:144+59, 'rain_mm'] = .2
+        change(tmp_path, station, rain)
+    if release:
+        def rain(d):
+            d.loc[d.index[-1], 'rain_mm'] = 12
+        change(tmp_path, 'N1', rain)
+    else:
+        (tmp_path/'maintenance_log.md').write_text(
+            f'{times[-1]:%Y-%m-%d}  N1  Cleaned the blocked rain gauge funnel.\n')
+    flag = issues(analyze(tmp_path), 'Blocked gauge / delayed release')
+    assert flag.station_id.tolist() == ['N1']
+    note = flag.note.iloc[0]
+    if release:
+        assert '12.0 mm across 1 consecutive observation(s)' in note
+    else:
+        assert 'followed by' not in note
 
 
 def test_coherent_weather_is_retained(tmp_path):
