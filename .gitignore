@@ -8,10 +8,13 @@
 # Any local packs or exports of raw observations belong here.
 /private_data/
 /diagnostics/
-# Protect raw-record copies too; only the two reviewed CSV deliverables are public.
+# Local recording material and reproducible intermediate reports.
+/waste/
+/report.html
+/coverage.csv
+# Protect raw-record copies; flags.csv is the required public CSV deliverable.
 *.csv
 !/flags.csv
-!/coverage.csv
 *.nmea
 *.NMEA
 # Keep conversation masters and unreviewed exports out of the public log folder.

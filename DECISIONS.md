@@ -6,7 +6,7 @@ Replace these prompts with your own words and keep the finished document within 
 
 **Your answer:** [Choose the station, specify the first check and the one-hour plan, and explain why it beats your second choice.]
 
-Evidence to inspect: S07's wind change near 26 March, the anemometer replacement note, its flag, and `report.html`. The checker finds a persistent wind-to-peer ratio change of about 0.25; that ratio is evidence of a problem, not a calibration factor. Compare S04's sunlight-linked temperature drift and the uncertainty of its cause. Say which equipment the technician must bring.
+Evidence to inspect: S07's wind change near 26 March, the anemometer replacement note, its flag, and `report.pdf`. The checker finds a persistent wind-to-peer ratio change of about 0.25; that ratio is evidence of a problem, not a calibration factor. Compare S04's sunlight-linked temperature drift and the uncertainty of its cause. Say which equipment the technician must bring.
 
 ## 2. Your least certain call
 
@@ -30,4 +30,4 @@ Consider state across runs, validated sensor/model metadata, processing time, re
 
 **Your working:** [Without code or AI, estimate the UTC time of the Sun's highest point at S04 on 20 March 2025; show a few lines and explain its relevance.]
 
-Read S04's coordinates directly from your private `stations.csv`. Write the estimate yourself. No answer, formula or computed time has been supplied here.
+Read S04's coordinates directly from your private `private_data/stations.csv`. Write the estimate yourself. No answer, formula or computed time has been supplied here.

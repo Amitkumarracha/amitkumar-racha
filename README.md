@@ -19,7 +19,7 @@ python checker.py /absolute/path/to/data-pack
 python -m pytest -q
 ```
 
-The pack contains `stations.csv`, `data/`, `gps/` and maintenance notes. It is intentionally absent from the public repository. Run from the desired output directory: the checker writes `flags.csv` there. In this local workspace, `python checker.py .` uses the pack at the project root. It discovers station IDs and intervals; anomaly dates and station IDs are not hardcoded.
+The pack contains `stations.csv`, `data/`, `gps/` and maintenance notes. It is intentionally absent from the public repository. Run from the desired output directory: the checker writes `flags.csv` there. In the applicant's local workspace, `python checker.py private_data` reads the ignored pack. Reviewers should pass their own pack path. Station IDs, intervals and anomaly dates are discovered rather than hardcoded.
 
 The seven output fields are `station_id,channel,start_utc,end_utc,issue,action,note`. Bounds are inclusive sample-end UTC labels. Actions are `exclude`, `correct` or `keep`; correction notes explain the transformation.
 
@@ -31,7 +31,7 @@ The seven output fields are `station_id,channel,start_utc,end_utc,issue,action,n
 - Pressure steps, wind scale changes, sunlight-linked temperature drift and blocked rain gauges, using peer and maintenance evidence.
 - Corroborated warm, dry, windy events retained without overriding another channel's exclusions.
 
-[CHECKS.md](CHECKS.md) documents thresholds, units and assumptions. [VALIDATION.md](VALIDATION.md) records the executed tests and source checks. This pack produces 40 flag intervals; the synthetic suite currently has 45 passing cases.
+[CHECKS.md](docs/CHECKS.md) documents thresholds, units and assumptions. [VALIDATION.md](docs/VALIDATION.md) records the executed tests and source checks. This pack produces 40 flag intervals; the synthetic suite currently has 51 passing cases, including selective wind outages and misleading rain-release evidence.
 
 Rebuild the report and aggregate coverage after generating flags:
 
@@ -39,10 +39,12 @@ Rebuild the report and aggregate coverage after generating flags:
 python build_report.py /absolute/path/to/data-pack
 ```
 
-This refuses stale flags. Reprint `report.html` to A4 PDF after any report change. Optional source-row audits use `--diagnostics .private/diagnostics`; never publish those files.
+This refuses stale flags and generates local `report.html` and `coverage.csv` intermediates. Print the HTML to A4 PDF after a report change; `report.pdf` is the submitted report. Optional source-row audits use `--diagnostics .private/diagnostics`; never publish those files.
+
+The repository root contains the code, required deliverables and dependency/test configuration. `tests/` holds synthetic cases, `docs/` holds check details and validation, and `ai_logs/` records conversation provenance and delivery status. The local `private_data/`, `.private/` and `waste/` folders are ignored; `waste/` holds recording notes, the assignment PDF and generated copies for the applicant to review.
 
 ## Limits and submission status
 
 No speculative calibration or rainfall reconstruction is applied. S04's earlier heating-bias onset and S05's location conflict remain unresolved. Absolute calibration, snow catch and the assessor's unseen pack were not verified; this batch checker is not an unattended 500-station service.
 
-Before submission, finish [DECISIONS.md](DECISIONS.md) in your own words, do its solar calculation without AI/code, supply the recording above, and complete the authentic AI-log delivery described in [ai_logs/README.md](ai_logs/README.md). Use [SUBMISSION_CHECKLIST.md](SUBMISSION_CHECKLIST.md). No commit, push or submission has been performed.
+Before submission, finish [DECISIONS.md](DECISIONS.md) in your own words, do its solar calculation without AI/code, supply the recording above, and complete the authentic AI-log delivery described in [ai_logs/README.md](ai_logs/README.md).

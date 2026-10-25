@@ -1,34 +1,33 @@
 {
-  "exported_at_utc": "2026-10-24T13:04:28.075237+00:00",
+  "exported_at_utc": "2026-10-25T14:54:56.044596+00:00",
   "source_file": "rollout-2026-10-24T16-57-11-01a16daa-2aa1-7fe1-a7d9-60bed522b65f.jsonl",
-  "source_bytes_read": 3384424,
-  "source_prefix_sha256": "62158150bfe67c43377381e65206edbe4828d8ed58275d18f328ea2d3d1bdf8c",
+  "source_bytes_read": 5676685,
+  "source_prefix_sha256": "d314b85a5cf1ec74012b4cad7e499b6a5cdde1e063f2dacbaa73531d2c35a30f",
   "starts_with_first_assignment_prompt": true,
   "first_record_utc": "2026-10-24T11:27:54.219Z",
-  "last_record_utc": "2026-10-24T13:04:12.634Z",
+  "last_record_utc": "2026-10-25T14:54:28.002Z",
   "first_assignment_prompt_utc": "2026-10-24T11:27:54.230Z",
-  "record_count": 147,
+  "record_count": 268,
   "counts": {
-    "user": 10,
-    "assistant": 21,
-    "custom_tool_call": 57,
-    "custom_tool_call_output": 56,
+    "user": 16,
+    "assistant": 35,
+    "custom_tool_call": 108,
+    "custom_tool_call_output": 107,
     "function_call": 1,
-    "assistant_question": 1,
     "function_call_output": 1
   },
   "unmatched_tool_calls_at_cutoff": 1,
   "status": "snapshot_refresh_after_final_turn",
   "public_release_status": "blocked_contains_supplied_data",
-  "raw_record_matches": 15,
+  "raw_record_matches": 31,
   "exports": {
     "codex-conversation.jsonl": {
       "local_path": ".private/ai_logs/codex-conversation.jsonl",
-      "sha256": "1e8430713cf4c1fb098d58d3ee0354ecce5d56a2c02d70f5aac67b6b87181c4e"
+      "sha256": "49e0323dc04324e6cdab1c4c2f7f6d417c2bd0e631ccb1eda4869c3667f226b6"
     },
     "codex-conversation.html": {
       "local_path": ".private/ai_logs/codex-conversation.html",
-      "sha256": "0b5a6ea5662c67ac0ff7c5571292b74163df45b17ca06231fcdeebf2d7a1667e"
+      "sha256": "60094409fac9a5b8bc79da6a005773d5f15f0e4f8ceb2c0b4375ce3243645cc5"
     }
   },
   "publication_link": null
